@@ -1,276 +1,277 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
     <title>图片编辑粗糙版</title>
-    <meta charset="utf-8"/>
-    <meta name="renderer" content="webkit"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta charset="utf-8" />
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <style>
-      #shadow {
-        position: absolute;
-      }
+        #shadow {
+            position: absolute;
+        }
     </style>
 </head>
 
 <body>
-<canvas id="shadow" height="400" width="400"></canvas>
-<canvas id="canvas" height="400" width="400"></canvas>
-<script type="text/javascript">
-var img = new Image;
-var start = null;
-var imgBox = document.getElementById("canvas");
-var ictx = imgBox.getContext("2d");
+    <canvas id="shadow" height="400" width="400"></canvas>
+    <canvas id="canvas" height="400" width="400"></canvas>
+    <script type="text/javascript">
+        var img = new Image;
+        var start = null;
+        var imgBox = document.getElementById("canvas");
+        var ictx = imgBox.getContext("2d");
 
-var canvas = document.getElementById("shadow");
-var ctx = canvas.getContext("2d");
+        var canvas = document.getElementById("shadow");
+        var ctx = canvas.getContext("2d");
 
-var strokeSize = 6;
-var halfStrokeSize = strokeSize/2;
-var isDown = false;
-var xPointer = 0;
-var yPointer = 0;
-var pointerArr = [];
-var moved = {x: 0, y: 0};
-var preMoved = {x: 0, y: 0};
-var dot = null;
-var preBigger = 0;
-var bigger = 0;
-var rotate = 0;
-var isCrop = false;
-var isResize = false;
-var isMoved = false;
-var isBigger = null;
-var isRotate = null;
-var message = '';
-var icon = new Image;
-icon.src = "./icon.png"
-var tmpImg = null;
-var imgScale = 1;
-var imgRegX = 0;
-var imgRegY = 0;
-var position = {
-    'bigger': {
-       iX: 445,
-       iY: 0,
-       iW: 43,
-       iH: 43,
-       bX: 140,
-       bY: canvas.height-36,
-       bW: 20,
-       bH: 20
-    },
-    'smaller': {
-       iX: 388,
-       iY: 0,
-       iW: 43,
-       iH: 43,
-       bX: 170,
-       bY: canvas.height-36,
-       bW: 20,
-       bH: 20
-    },
-    'rotateLeft': {
-       iX: 235,
-       iY: 0,
-       iW: 43,
-       iH: 43,
-       bX: 200,
-       bY: canvas.height-36,
-       bW: 20,
-       bH: 20
-    },
-    'rotateRight': {
-       iX: 285,
-       iY: 0,
-       iW: 43,
-       iH: 43,
-       bX: 230,
-       bY: canvas.height-36,
-       bW: 20,
-       bH: 20
-    },
-    'cropOpen': {
-       iX: 335,
-       iY: 0,
-       iW: 43,
-       iH: 43,
-       bX: 260,
-       bY: canvas.height-36,
-       bW: 20,
-       bH: 20
-    },
-    'resizeDot': {
-       iX: 580,
-       iY: 0,
-       iW: 43,
-       iH: 43,
-       bX: 1,
-       bY: canvas.height/2-10,
-       bW: 20,
-       bH: 20
-    },
-    'cropCancel': {
-       iX: 540,
-       iY: 0,
-       iW: 43,
-       iH: 43,
-       bX: 250.5+moved.x,
-       bY: 308.5+moved.y,
-       bW: 20,
-       bH: 20
-    },
-    'cropSubmit': {
-       iX: 500,
-       iY: 0,
-       iW: 43,
-       iH: 43,
-       bX: 276.5+moved.x,
-       bY: 308.5+moved.y,
-       bW: 20,
-       bH: 20
-    }
-}
-
-canvas.addEventListener('mousedown', function(e) {
-    isDown = true;
-    xPointer = e.clientX - this.offsetLeft;
-    yPointer = e.clientY - this.offsetTop;
-    pointerArr.push([xPointer, yPointer]);
-})
-
-canvas.addEventListener('mousemove', function(e) {
-        xPointer = e.clientX - this.offsetLeft;
-        yPointer = e.clientY - this.offsetTop;
-    if(isDown) {
-        pointerArr.push([xPointer, yPointer]);
-        if(isCrop && isMoved) {
-            move()
-        }else if(isResize){
-            // 移动滑块
-            bigger = preBigger - 95*(yPointer - pointerArr[0][1])/(canvas.height/2-35)*0.0095
-            resize()
-        }else{
-            //移动图片
+        var strokeSize = 6;
+        var halfStrokeSize = strokeSize / 2;
+        var isDown = false;
+        var xPointer = 0;
+        var yPointer = 0;
+        var pointerArr = [];
+        var moved = { x: 0, y: 0 };
+        var preMoved = { x: 0, y: 0 };
+        var dot = null;
+        var preBigger = 0;
+        var bigger = 0;
+        var rotate = 0;
+        var isCrop = false;
+        var isResize = false;
+        var isMoved = false;
+        var isBigger = null;
+        var isRotate = null;
+        var message = '';
+        var icon = new Image;
+        icon.src = "./icon.png"
+        var tmpImg = null;
+        var imgScale = 1;
+        var imgRegX = 0;
+        var imgRegY = 0;
+        var position = {
+            'bigger': {
+                iX: 445,
+                iY: 0,
+                iW: 43,
+                iH: 43,
+                bX: 140,
+                bY: canvas.height - 36,
+                bW: 20,
+                bH: 20
+            },
+            'smaller': {
+                iX: 388,
+                iY: 0,
+                iW: 43,
+                iH: 43,
+                bX: 170,
+                bY: canvas.height - 36,
+                bW: 20,
+                bH: 20
+            },
+            'rotateLeft': {
+                iX: 235,
+                iY: 0,
+                iW: 43,
+                iH: 43,
+                bX: 200,
+                bY: canvas.height - 36,
+                bW: 20,
+                bH: 20
+            },
+            'rotateRight': {
+                iX: 285,
+                iY: 0,
+                iW: 43,
+                iH: 43,
+                bX: 230,
+                bY: canvas.height - 36,
+                bW: 20,
+                bH: 20
+            },
+            'cropOpen': {
+                iX: 335,
+                iY: 0,
+                iW: 43,
+                iH: 43,
+                bX: 260,
+                bY: canvas.height - 36,
+                bW: 20,
+                bH: 20
+            },
+            'resizeDot': {
+                iX: 580,
+                iY: 0,
+                iW: 43,
+                iH: 43,
+                bX: 1,
+                bY: canvas.height / 2 - 10,
+                bW: 20,
+                bH: 20
+            },
+            'cropCancel': {
+                iX: 540,
+                iY: 0,
+                iW: 43,
+                iH: 43,
+                bX: 250.5 + moved.x,
+                bY: 308.5 + moved.y,
+                bW: 20,
+                bH: 20
+            },
+            'cropSubmit': {
+                iX: 500,
+                iY: 0,
+                iW: 43,
+                iH: 43,
+                bX: 276.5 + moved.x,
+                bY: 308.5 + moved.y,
+                bW: 20,
+                bH: 20
+            }
         }
-    }else{
-        if (isCrop && xPointer >= 100.5+moved.x-halfStrokeSize && xPointer <=  300.5+moved.x-halfStrokeSize && yPointer >= 100.5+moved.y-halfStrokeSize && yPointer <= 300.5+moved.y-halfStrokeSize) {
-            this.style.cursor="move"
-            isMoved = true
-        }else{
-            this.style.cursor="auto"
-            isMoved = false
-        }
-        preview();
-    }
-})
 
-canvas.addEventListener('mousewheel', function(e) {
-    if(isCrop) return false;
-    if(e.deltaY > 0)
-        bigger -= 0.05
-    else
-        bigger += 0.05
-    resize();
-    preBigger = bigger;
-})
+        canvas.addEventListener('mousedown', function (e) {
+            isDown = true;
+            xPointer = e.clientX - this.offsetLeft;
+            yPointer = e.clientY - this.offsetTop;
+            pointerArr.push([xPointer, yPointer]);
+        })
 
-window.addEventListener('mouseup', function(e) {
-    if(isResize) {
-        preBigger = bigger;
-        resize()
-    }
-    isDown = false;
-    pointerArr = [];
-    preMoved = moved;
-    isResize = false;
-    isMoved = false;
-    position.bigger.iY = 0;
-    position.smaller.iY = 0;
-    position.rotateLeft.iY = 0;
-    position.rotateRight.iY = 0;
-    position.resizeDot.iY = 0;
-})
+        canvas.addEventListener('mousemove', function (e) {
+            xPointer = e.clientX - this.offsetLeft;
+            yPointer = e.clientY - this.offsetTop;
+            if (isDown) {
+                pointerArr.push([xPointer, yPointer]);
+                if (isCrop && isMoved) {
+                    move()
+                } else if (isResize) {
+                    // 移动滑块
+                    bigger = preBigger - 95 * (yPointer - pointerArr[0][1]) / (canvas.height / 2 - 35) * 0.0095
+                    resize()
+                } else {
+                    //移动图片
+                }
+            } else {
+                if (isCrop && xPointer >= 100.5 + moved.x - halfStrokeSize && xPointer <= 300.5 + moved.x - halfStrokeSize && yPointer >= 100.5 + moved.y - halfStrokeSize && yPointer <= 300.5 + moved.y - halfStrokeSize) {
+                    this.style.cursor = "move"
+                    isMoved = true
+                } else {
+                    this.style.cursor = "auto"
+                    isMoved = false
+                }
+                preview();
+            }
+        })
+
+        canvas.addEventListener('mousewheel', function (e) {
+            if (isCrop) return false;
+            if (e.deltaY > 0)
+                bigger -= 0.05
+            else
+                bigger += 0.05
+            resize();
+            preBigger = bigger;
+        })
+
+        window.addEventListener('mouseup', function (e) {
+            if (isResize) {
+                preBigger = bigger;
+                resize()
+            }
+            isDown = false;
+            pointerArr = [];
+            preMoved = moved;
+            isResize = false;
+            isMoved = false;
+            position.bigger.iY = 0;
+            position.smaller.iY = 0;
+            position.rotateLeft.iY = 0;
+            position.rotateRight.iY = 0;
+            position.resizeDot.iY = 0;
+        })
 
 
-var GUI = [];
+        var GUI = [];
 
 
 
-var Button = function(iX, iY, iW, iH, bX, bY, bW, bH, bFunc) {
-    this.cursorIn = false;
-    this.iX = iX || 0;
-    this.iY = iY || 0;
-    this.iW = iW || 30;
-    this.iH = iH || 30;
-    this.bX = bX || 10;
-    this.bY = bY || 10;
-    this.bW = bW || 20;
-    this.bH = bH || 20;
-    this.bFunc = bFunc || function() {
-        console.log('bFunc');
-    }
-    this.init()
-}
-Button.prototype.init = function() {
-    this.over = this.over.bind(this);
-    this.pressed = this.pressed.bind(this);
-    canvas.addEventListener('mousemove', this.over, false);
-    canvas.addEventListener('mousedown', this.pressed, false);
-}
-
-Button.prototype.draw = function() {
-    ctx.drawImage(icon, this.iX, this.iY, this.iW, this.iH, this.bX, this.bY, this.bW, this.bH);
-}
-
-Button.prototype.over = function(event) {
-        if (!event) var event = window.event;
-        event.cancelBubble = true;
-        if (event.stopPropagation) event.stopPropagation();
-        if (event.x !== undefined && event.y !== undefined) {
-            xPointer = event.x;
-            yPointer = event.y;
-        } else {
-            xPointer = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-            yPointer = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-        };
-
-        xPointer -= canvas.offsetLeft;
-        yPointer -= canvas.offsetTop;
-
-        if (xPointer >= this.bX && xPointer <= (this.bX + this.bW) && yPointer >= this.bY && yPointer <= (this.bY + this.bH)) {
-            canvas.style.cursor = 'pointer';
-            this.cursorIn = true;
-        } else if(this.cursorIn){
-            canvas.style.cursor = 'default';
+        var Button = function (iX, iY, iW, iH, bX, bY, bW, bH, bFunc) {
             this.cursorIn = false;
+            this.iX = iX || 0;
+            this.iY = iY || 0;
+            this.iW = iW || 30;
+            this.iH = iH || 30;
+            this.bX = bX || 10;
+            this.bY = bY || 10;
+            this.bW = bW || 20;
+            this.bH = bH || 20;
+            this.bFunc = bFunc || function () {
+                console.log('bFunc');
+            }
+            this.init()
+        }
+        Button.prototype.init = function () {
+            this.over = this.over.bind(this);
+            this.pressed = this.pressed.bind(this);
+            canvas.addEventListener('mousemove', this.over, false);
+            canvas.addEventListener('mousedown', this.pressed, false);
+        }
+
+        Button.prototype.draw = function () {
+            ctx.drawImage(icon, this.iX, this.iY, this.iW, this.iH, this.bX, this.bY, this.bW, this.bH);
+        }
+
+        Button.prototype.over = function (event) {
+            if (!event) var event = window.event;
+            event.cancelBubble = true;
+            if (event.stopPropagation) event.stopPropagation();
+            if (event.x !== undefined && event.y !== undefined) {
+                xPointer = event.x;
+                yPointer = event.y;
+            } else {
+                xPointer = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                yPointer = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+            };
+
+            xPointer -= canvas.offsetLeft;
+            yPointer -= canvas.offsetTop;
+
+            if (xPointer >= this.bX && xPointer <= (this.bX + this.bW) && yPointer >= this.bY && yPointer <= (this.bY + this.bH)) {
+                canvas.style.cursor = 'pointer';
+                this.cursorIn = true;
+            } else if (this.cursorIn) {
+                canvas.style.cursor = 'default';
+                this.cursorIn = false;
+            };
+        }
+
+        Button.prototype.pressed = function (event) {
+            if (!event) var event = window.event;
+            event.cancelBubble = true;
+            if (event.stopPropagation) event.stopPropagation();
+            if (event.x !== undefined && event.y !== undefined) {
+                xPointer = event.x;
+                yPointer = event.y;
+            } else {
+                xPointer = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                yPointer = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+            };
+
+            xPointer -= canvas.offsetLeft;
+            yPointer -= canvas.offsetTop;
+
+            if (xPointer >= this.bX && xPointer <= (this.bX + this.bW) && yPointer >= this.bY && yPointer <= (this.bY + this.bH)) {
+                this.bFunc();
+            };
+
+        }
+
+        Button.prototype.removePress = function () {
+            canvas.removeEventListener('mousemove', this.over, false);
+            canvas.removeEventListener('mousedown', this.pressed, false);
         };
-}
-
-Button.prototype.pressed = function(event) {
-        if (!event) var event = window.event;
-        event.cancelBubble = true;
-        if (event.stopPropagation) event.stopPropagation();
-        if (event.x !== undefined && event.y !== undefined) {
-            xPointer = event.x;
-            yPointer = event.y;
-        } else {
-            xPointer = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-            yPointer = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-        };
-
-        xPointer -= canvas.offsetLeft;
-        yPointer -= canvas.offsetTop;
-
-        if (xPointer >= this.bX && xPointer <= (this.bX + this.bW) && yPointer >= this.bY && yPointer <= (this.bY + this.bH)) {
-            this.bFunc();
-        };
-
-}
-
-Button.prototype.removePress = function () {
-        canvas.removeEventListener('mousemove', this.over, false);
-        canvas.removeEventListener('mousedown', this.pressed, false);
-};
 
 
 
@@ -278,467 +279,467 @@ Button.prototype.removePress = function () {
 
 
 
-function initTool() {
-    if(isCrop) return false;
-    ctx.restore();
-    ctx.strokeStyle = "rgb(3,169,244)";
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.lineWidth=1;
-    ctx.fillRect(30.5, canvas.height-40.5, canvas.width-61, 29);
-    ctx.strokeRect(30.5, canvas.height-40.5, canvas.width-61, 29);
-    ctx.beginPath();
-    ctx.moveTo(12, 25);
-    ctx.lineTo(12, canvas.height-25);
-    ctx.lineWidth=5;
-    ctx.strokeStyle="rgba(233,233,233, 0.5)";
-    ctx.lineCap='round';
-    ctx.stroke();
-    GUI.push(
-        new Button(position.bigger.iX, position.bigger.iY, position.bigger.iW, position.bigger.iH, position.bigger.bX, position.bigger.bY, position.bigger.bW, position.bigger.bH, function() {
-            bigger += 0.05;
-            position.bigger.iY = 43;
-            resize()
-            preBigger = bigger
-        })
-    );
-    GUI.push(
-        new Button(position.smaller.iX, position.smaller.iY, position.smaller.iW, position.smaller.iH, position.smaller.bX, position.smaller.bY, position.smaller.bW, position.smaller.bH, function() {
-            bigger -= 0.05;
-            position.smaller.iY = 43;
-            resize()
-            preBigger = bigger
-        })
-    );
-    GUI.push(
-        new Button(position.rotateLeft.iX, position.rotateLeft.iY, position.rotateLeft.iW, position.rotateLeft.iH, position.rotateLeft.bX, position.rotateLeft.bY, position.rotateLeft.bW, position.rotateLeft.bH, function() {
-            console.log('click rotate left')
-            rotate -= 90;
-            position.rotateLeft.iY = 43;
-            rotating()
-        })
-    );
-    GUI.push(
-        new Button(position.rotateRight.iX, position.rotateRight.iY, position.rotateRight.iW, position.rotateRight.iH, position.rotateRight.bX, position.rotateRight.bY, position.rotateRight.bW, position.rotateRight.bH, function() {
-            console.log('click rotate right')
-            rotate += 90
-            position.rotateRight.iY = 43;
-            rotating()
-        })
-    );
-    GUI.push(
-        new Button(position.cropOpen.iX, position.cropOpen.iY, position.cropOpen.iW, position.cropOpen.iH, position.cropOpen.bX, position.cropOpen.bY, position.cropOpen.bW, position.cropOpen.bH, function() {
-            isCrop = !isCrop;
+        function initTool() {
+            if (isCrop) return false;
+            ctx.restore();
+            ctx.strokeStyle = "rgb(3,169,244)";
+            ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+            ctx.lineWidth = 1;
+            ctx.fillRect(30.5, canvas.height - 40.5, canvas.width - 61, 29);
+            ctx.strokeRect(30.5, canvas.height - 40.5, canvas.width - 61, 29);
+            ctx.beginPath();
+            ctx.moveTo(12, 25);
+            ctx.lineTo(12, canvas.height - 25);
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = "rgba(233,233,233, 0.5)";
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            GUI.push(
+                new Button(position.bigger.iX, position.bigger.iY, position.bigger.iW, position.bigger.iH, position.bigger.bX, position.bigger.bY, position.bigger.bW, position.bigger.bH, function () {
+                    bigger += 0.05;
+                    position.bigger.iY = 43;
+                    resize()
+                    preBigger = bigger
+                })
+            );
+            GUI.push(
+                new Button(position.smaller.iX, position.smaller.iY, position.smaller.iW, position.smaller.iH, position.smaller.bX, position.smaller.bY, position.smaller.bW, position.smaller.bH, function () {
+                    bigger -= 0.05;
+                    position.smaller.iY = 43;
+                    resize()
+                    preBigger = bigger
+                })
+            );
+            GUI.push(
+                new Button(position.rotateLeft.iX, position.rotateLeft.iY, position.rotateLeft.iW, position.rotateLeft.iH, position.rotateLeft.bX, position.rotateLeft.bY, position.rotateLeft.bW, position.rotateLeft.bH, function () {
+                    console.log('click rotate left')
+                    rotate -= 90;
+                    position.rotateLeft.iY = 43;
+                    rotating()
+                })
+            );
+            GUI.push(
+                new Button(position.rotateRight.iX, position.rotateRight.iY, position.rotateRight.iW, position.rotateRight.iH, position.rotateRight.bX, position.rotateRight.bY, position.rotateRight.bW, position.rotateRight.bH, function () {
+                    console.log('click rotate right')
+                    rotate += 90
+                    position.rotateRight.iY = 43;
+                    rotating()
+                })
+            );
+            GUI.push(
+                new Button(position.cropOpen.iX, position.cropOpen.iY, position.cropOpen.iW, position.cropOpen.iH, position.cropOpen.bX, position.cropOpen.bY, position.cropOpen.bW, position.cropOpen.bH, function () {
+                    isCrop = !isCrop;
+                    load()
+                })
+            );
+            GUI.push(
+                new Button(position.resizeDot.iX, position.resizeDot.iY, position.resizeDot.iW, position.resizeDot.iH, position.resizeDot.bX, position.resizeDot.bY, position.resizeDot.bW, position.resizeDot.bH, function () {
+                    isResize = !isResize;
+                    position.resizeDot.iY = 43;
+                })
+            );
+            drawGUI();
+        }
+
+        function drawGUI() {
+            GUI.forEach(function (button) {
+                button.draw();
+            })
+        }
+
+
+
+
+
+
+
+
+
+
+
+        function slideBar() {
+            ctx.restore();
+            ctx.beginPath();
+            ctx.moveTo(12, 25);
+            ctx.lineTo(12, canvas.height - 25);
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = "rgba(233,233,233, 0.5)";
+            ctx.lineCap = 'round';
+            ctx.stroke();
+        }
+
+        function tool() {
+            //if(isCrop) return false;
+            ctx.restore();
+            ctx.strokeStyle = "rgb(3,169,244)";
+            ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+            ctx.lineWidth = 1;
+            ctx.fillRect(30.5, canvas.height - 40.5, canvas.width - 61, 29);
+            ctx.strokeRect(30.5, canvas.height - 40.5, canvas.width - 61, 29);
+            // big
+            if (isBigger === true)
+                ctx.drawImage(icon, 460, 43, 43, 43, 140, canvas.height - 36, 20, 20)
+            else
+                ctx.drawImage(icon, 460, 0, 43, 43, 140, canvas.height - 36, 20, 20)
+            if (isBigger === false)
+                ctx.drawImage(icon, 403, 43, 43, 43, 170, canvas.height - 36, 20, 20)
+            else
+                ctx.drawImage(icon, 403, 0, 43, 43, 170, canvas.height - 36, 20, 20)
+            if (isRotate === false)
+                ctx.drawImage(icon, 250, 43, 43, 43, 200, canvas.height - 36, 20, 20)
+            else
+                ctx.drawImage(icon, 250, 0, 43, 43, 200, canvas.height - 36, 20, 20)
+            if (isRotate === true)
+                ctx.drawImage(icon, 300, 43, 43, 43, 230, canvas.height - 36, 20, 20)
+            else
+                ctx.drawImage(icon, 300, 0, 43, 43, 230, canvas.height - 36, 20, 20)
+            if (!isCrop)
+                ctx.drawImage(icon, 350, 0, 43, 43, 260, canvas.height - 36, 20, 20)
+            else
+                ctx.drawImage(icon, 350, 43, 43, 43, 260, canvas.height - 36, 20, 20)
+            isBigger = null;
+            isRotate = null;
+        }
+
+        function showMsg(msg) {
+            if (!msg) return false;
+            message = "";
+            ctx.restore();
+
+            ctx.beginPath();
+            ctx.moveTo(166, 200);
+            ctx.lineTo(234, 200);
+            ctx.lineWidth = 30;
+            ctx.strokeStyle = "rgba(0,0,0, 0.5)";
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            ctx.fillStyle = "rgba(255,255,255,0.80)";
+            ctx.font = "12px \"微软雅黑\"";
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(msg, 200, 200);
+            ctx.beginPath();
+            ctx.stroke();
+        }
+        function resize() {
+            message = parseInt(bigger * 100 + 100) + "%"
+            if (bigger >= 0.95) {
+                message = "已放到最大"
+                bigger = 0.95;
+            }
+            if (bigger <= -0.95) {
+                message = "已缩到最小"
+                bigger = -0.95
+            }
+            position.resizeDot.bY = canvas.height / 2 - 10 - bigger * (canvas.height - 42) / 2;
+            console.log(bigger, position.resizeDot.bY)
             load()
-        })
-    );
-    GUI.push(
-        new Button(position.resizeDot.iX, position.resizeDot.iY, position.resizeDot.iW, position.resizeDot.iH, position.resizeDot.bX, position.resizeDot.bY, position.resizeDot.bW, position.resizeDot.bH, function() {
-            isResize = !isResize;
-            position.resizeDot.iY = 43;
-        })
-    );
-    drawGUI();
-}
-
-function drawGUI() {
-    GUI.forEach(function(button) {
-        button.draw();
-    })
-}
-
-
-
-
-
-
-
-
-
-
-
-function slideBar() {
-    ctx.restore();
-    ctx.beginPath();
-    ctx.moveTo(12, 25);
-    ctx.lineTo(12, canvas.height-25);
-    ctx.lineWidth=5;
-    ctx.strokeStyle="rgba(233,233,233, 0.5)";
-    ctx.lineCap='round';
-    ctx.stroke();
-}
-
-function tool() {
-    //if(isCrop) return false;
-    ctx.restore();
-    ctx.strokeStyle = "rgb(3,169,244)";
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.lineWidth=1;
-    ctx.fillRect(30.5, canvas.height-40.5, canvas.width-61, 29);
-    ctx.strokeRect(30.5, canvas.height-40.5, canvas.width-61, 29);
-    // big
-    if(isBigger === true)
-        ctx.drawImage(icon, 460, 43, 43,  43, 140, canvas.height-36, 20, 20)
-    else
-        ctx.drawImage(icon, 460, 0, 43,  43, 140, canvas.height-36, 20, 20)
-    if(isBigger === false)
-        ctx.drawImage(icon, 403, 43, 43,  43, 170, canvas.height-36, 20, 20)
-    else
-        ctx.drawImage(icon, 403, 0, 43,  43, 170, canvas.height-36, 20, 20)
-    if(isRotate === false)
-        ctx.drawImage(icon, 250, 43, 43,  43, 200, canvas.height-36, 20, 20)
-    else
-        ctx.drawImage(icon, 250, 0, 43,  43, 200, canvas.height-36, 20, 20)
-    if(isRotate === true)
-        ctx.drawImage(icon, 300, 43, 43,  43, 230, canvas.height-36, 20, 20)
-    else
-        ctx.drawImage(icon, 300, 0, 43,  43, 230, canvas.height-36, 20, 20)
-    if(!isCrop)
-        ctx.drawImage(icon, 350, 0, 43,  43, 260, canvas.height-36, 20, 20)
-    else
-        ctx.drawImage(icon, 350, 43, 43,  43, 260, canvas.height-36, 20, 20)
-    isBigger = null;
-    isRotate = null;
-}
-
-function showMsg(msg) {
-    if(!msg) return false;
-    message = "";
-    ctx.restore();
-
-    ctx.beginPath();
-    ctx.moveTo(166, 200);
-    ctx.lineTo(234, 200);
-    ctx.lineWidth=30;
-    ctx.strokeStyle="rgba(0,0,0, 0.5)";
-    ctx.lineCap='round';
-    ctx.stroke();
-    ctx.fillStyle="rgba(255,255,255,0.80)";
-    ctx.font = "12px \"微软雅黑\"";
-    ctx.textAlign='center';
-    ctx.textBaseline='middle';
-    ctx.fillText(msg, 200, 200);
-    ctx.beginPath();
-    ctx.stroke();
-}
-function resize() {
-    message = parseInt(bigger*100+100)+"%"
-    if(bigger >= 0.95) {
-        message = "已放到最大"
-        bigger = 0.95;
-    }
-    if(bigger <= -0.95) {
-        message = "已缩到最小"
-        bigger = -0.95
-    }
-    position.resizeDot.bY = canvas.height/2-10-bigger*(canvas.height-42)/2;
-    console.log(bigger,position.resizeDot.bY)
-    load()
-}
-
-function move() {
-    var last = pointerArr[pointerArr.length-1];
-    moved = {
-        x: last[0] - pointerArr[0][0]+preMoved.x,
-        y: last[1] - pointerArr[0][1]+preMoved.y
-    }
-
-    if(moved.x < -100) moved.x = -100.5
-    else if(moved.x > 100) moved.x = 99.5
-    if(moved.y < -100) moved.y = -100.5
-    else if(moved.y > 100) moved.y = 99.5
-    load()
-}
-
-function rotating() {
-    rotate = (rotate%360+360)%360;
-    load()
-}
-
-function crop() {
-    var tmpCanvas = document.createElement('canvas')
-    tmpCanvas.width = canvas.width-200;
-    tmpCanvas.height = canvas.height-200;
-    var tmpCtx = tmpCanvas.getContext('2d');
-    tmpCtx.drawImage(imgBox, 101+moved.x, 100.5+moved.y, canvas.width-200, canvas.height-200, 0, 0, tmpCanvas.width, tmpCanvas.height);
-    var tmpImg = document.createElement('img')
-    tmpImg.src = getAsDataUrl(tmpCanvas);
-    document.body.appendChild(tmpImg)
-}
-
-function clear(ctx) {
-    GUI.forEach(function (button) {
-        button.removePress();
-    });
-    GUI = [];
-    ctx.restore();
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-}
-function draw() {
-    if(!isCrop) return false;
-    dot = [
-        [100.5+moved.x-halfStrokeSize, 100.5+moved.y-halfStrokeSize],
-        [200.5+moved.x-halfStrokeSize, 100.5+moved.y-halfStrokeSize],
-        [300.5+moved.x-halfStrokeSize, 100.5+moved.y-halfStrokeSize],
-        [300.5+moved.x-halfStrokeSize, 200.5+moved.y-halfStrokeSize],
-        [300.5+moved.x-halfStrokeSize, 300.5+moved.y-halfStrokeSize],
-        [200.5+moved.x-halfStrokeSize, 300.5+moved.y-halfStrokeSize],
-        [100.5+moved.x-halfStrokeSize, 300.5+moved.y-halfStrokeSize],
-        [100.5+moved.x-halfStrokeSize, 200.5+moved.y-halfStrokeSize],
-        [100.5+moved.x-halfStrokeSize, 300.5+moved.y-halfStrokeSize],
-    ]
-    ctx.restore();
-    ctx.fillStyle = "rgba(3,169,244,1)";
-    ctx.strokeStyle = "rgb(255,255,255, 0.5)";
-    ctx.lineWidth=1;
-    ctx.save()
-    ctx.setLineDash([4, 4]);
-    ctx.strokeRect(100.5+moved.x, 100.5+moved.y, 200, 200);
-    ctx.restore();
-    ctx.fillRect(dot[0][0], dot[0][1], strokeSize, strokeSize);
-    ctx.strokeRect(dot[0][0], dot[0][1], strokeSize, strokeSize);
-    ctx.fillRect(dot[1][0], dot[1][1], strokeSize, strokeSize);
-    ctx.strokeRect(dot[1][0], dot[1][1], strokeSize, strokeSize);
-    ctx.fillRect(dot[2][0], dot[2][1], strokeSize, strokeSize);
-    ctx.strokeRect(dot[2][0], dot[2][1], strokeSize, strokeSize);
-    ctx.fillRect(dot[3][0], dot[3][1], strokeSize, strokeSize);
-    ctx.strokeRect(dot[3][0], dot[3][1], strokeSize, strokeSize);
-    ctx.fillRect(dot[4][0], dot[4][1], strokeSize, strokeSize);
-    ctx.strokeRect(dot[4][0], dot[4][1], strokeSize, strokeSize);
-    ctx.fillRect(dot[5][0], dot[5][1], strokeSize, strokeSize);
-    ctx.strokeRect(dot[5][0], dot[5][1], strokeSize, strokeSize);
-    ctx.fillRect(dot[6][0], dot[6][1], strokeSize, strokeSize);
-    ctx.strokeRect(dot[6][0], dot[6][1], strokeSize, strokeSize);
-    ctx.fillRect(dot[7][0], dot[7][1], strokeSize, strokeSize);
-    ctx.strokeRect(dot[7][0], dot[7][1], strokeSize, strokeSize);
-}
-
-function preview() {
-    if(!isCrop) return false;
-    ctx.restore();
-    var x = 0, y = 0;
-    if(100.5+moved.y < 85) {
-        if(101+moved.x < 85) {
-            // 右
-            x = 205;
-        }else{
-            // 左
-            x = -85;
         }
-        y = 85
-    }
-    ctx.clearRect(102+moved.x+x, 16+moved.y+y, 80, 80);
-    //ctx.drawImage(img, (xPointer-10)/imgScale+imgRegX, (yPointer-10)/imgScale+imgRegY, 20/imgScale, 20/imgScale, 102+moved.x+x, 15.5+moved.y+y, 80, 80)
-    ctx.drawImage(imgBox, (xPointer-10), (yPointer-10), 20, 20, 102+moved.x+x, 15.5+moved.y+y, 80, 80)
-    ctx.strokeStyle = "red";
-    ctx.lineWidth=1;
-    ctx.beginPath();
-    ctx.moveTo(102+moved.x+x, 56.5+moved.y+y);
-    ctx.lineTo(182+moved.x+x, 56.5+moved.y+y);
-    ctx.moveTo(142.5+moved.x+x, 16.5+moved.y+y);
-    ctx.lineTo(142.5+moved.x+x, 95.5+moved.y+y);
-    ctx.closePath();
-    ctx.stroke();
 
-}
+        function move() {
+            var last = pointerArr[pointerArr.length - 1];
+            moved = {
+                x: last[0] - pointerArr[0][0] + preMoved.x,
+                y: last[1] - pointerArr[0][1] + preMoved.y
+            }
 
-function mask() {
-    if(!isCrop) return false;
-    ctx.restore();
-    //ctx.globalCompositeOperation = "destination-over"
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
-    ctx.strokeStyle = "rgb(255,255,255)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.clearRect(101+moved.x, 100.5+moved.y, 199.5, 199);
-    ctx.lineWidth=1;
-    console.log(101+moved.x, 100.5+moved.y)
-    if(100.5+moved.y < 85) {
-        ctx.fillRect(101+149.5+moved.x, 100.5+206+moved.y, 50, 25);
-        ctx.strokeRect(101+149.5+moved.x, 100.5+206+moved.y, 50, 25);
-        if(101+moved.x < 85) {
-            // 右
-            ctx.strokeRect(306.5+moved.x, 100.5+moved.y, 81, 81);
-        }else{
-            // 左
-            ctx.strokeRect(16.5+moved.x, 100.5+moved.y, 81, 81);
-        }
-    }else if(300.5+moved.y > canvas.height-30){
-        ctx.strokeRect(101+moved.x, 15.5+moved.y, 81, 81);
-        if(101+moved.x < 55) {
-            // 右
-            ctx.fillRect(306+moved.x, 100.5+176+moved.y, 50, 25);
-            ctx.strokeRect(306+moved.x, 100.5+176+moved.y, 50, 25);
-            position.cropSubmit.bX = 331.5;
-            position.cropSubmit.bY = 278.5;
-            position.cropCancel.bX = 305.5;
-            position.cropCancel.bY = 278.5;
-        }else{
-            // 左
-            ctx.fillRect(46+moved.x, 100.5+176+moved.y, 50, 25);
-            ctx.strokeRect(46+moved.x, 100.5+176+moved.y, 50, 25);
-            position.cropSubmit.bX = 72.5;
-            position.cropSubmit.bY = 278.5;
-            position.cropCancel.bX = 46.5;
-            position.cropCancel.bY = 278.5;
-        }
-    }else{
-        ctx.strokeRect(101.5+moved.x, 15.5+moved.y, 81, 81);
-        ctx.fillRect(101+149.5+moved.x, 100.5+206+moved.y, 50, 25);
-        ctx.strokeRect(101+149.5+moved.x, 100.5+206+moved.y, 50, 25);
-        position.cropSubmit.bX = 276.5;
-        position.cropSubmit.bY = 308.5;
-        position.cropCancel.bX = 250.5;
-        position.cropCancel.bY = 308.5;
-    }
-    GUI.push(
-        new Button(position.cropSubmit.iX, position.cropSubmit.iY, position.cropSubmit.iW, position.cropSubmit.iH, position.cropSubmit.bX+moved.x, position.cropSubmit.bY+moved.y, position.cropSubmit.bW, position.cropSubmit.bH, function() {
-            console.log('crop')
-            crop()
-        })
-    );
-    GUI.push(
-        new Button(position.cropCancel.iX, position.cropCancel.iY, position.cropCancel.iW, position.cropCancel.iH, position.cropCancel.bX+moved.x, position.cropCancel.bY+moved.y, position.cropCancel.bW, position.cropCancel.bH, function() {
-            isCrop = false;
+            if (moved.x < -100) moved.x = -100.5
+            else if (moved.x > 100) moved.x = 99.5
+            if (moved.y < -100) moved.y = -100.5
+            else if (moved.y > 100) moved.y = 99.5
             load()
-        })
-    );
-    drawGUI();
-}
-
-
-function step(timestamp) {
-    if(timestamp%500 > 250) {
-        if(ctx.lineDashOffset === 2) {
-            requestAnimationFrame(step);
-            return false;
         }
-        ctx.restore();
-        ctx.lineDashOffset = 2;
-    }else{
-        if(ctx.lineDashOffset === 6) {
-            requestAnimationFrame(step);
-            return false;
+
+        function rotating() {
+            rotate = (rotate % 360 + 360) % 360;
+            load()
         }
-        ctx.restore();
-        ctx.lineDashOffset = 6;
-    }
-    console.log('draw')
-    load()
-    requestAnimationFrame(step);
-}
 
-function load() {
-img.onload = function() {
-    clear(ictx)
-    //mask()
-    //draw()
-    //slideBar()
-    //initTool()
-    //showMsg(message)
-    ictx.save();
-    var imgRotation = 0;
-    imgRegX = 0;
-    imgRegY = 0;
-    var vertSquashRatio = detectVerticalSquash(img);
-    var imgWidth = img.width;
-    var imgHeight = img.height;
-    var imgRotate = (rotate%360+360)%360;
-    imgScale = 1;
-    imgWidth *= vertSquashRatio;
-    imgHeight *= vertSquashRatio;
-    // 根据长宽比进行缩放
-    if(canvas.width/imgWidth > canvas.height/imgHeight) {
-        imgScale = canvas.width/imgWidth;
-    }else{
-        imgScale = canvas.height/imgHeight;
-    }
-    imgScale += imgScale * bigger;
-    // 旋转
-    switch(imgRotate) {
-        case 90:
-            imgRegX = -imgHeight * vertSquashRatio;
-            break;
-        case 180:
-            imgRegX = -imgWidth;
-            imgRegY = -imgHeight * vertSquashRatio;
-            break;
-        case 270:
-            imgRegY = -imgWidth * vertSquashRatio;
-            break;
-    }
+        function crop() {
+            var tmpCanvas = document.createElement('canvas')
+            tmpCanvas.width = canvas.width - 200;
+            tmpCanvas.height = canvas.height - 200;
+            var tmpCtx = tmpCanvas.getContext('2d');
+            tmpCtx.drawImage(imgBox, 101 + moved.x, 100.5 + moved.y, canvas.width - 200, canvas.height - 200, 0, 0, tmpCanvas.width, tmpCanvas.height);
+            var tmpImg = document.createElement('img')
+            tmpImg.src = getAsDataUrl(tmpCanvas);
+            document.body.appendChild(tmpImg)
+        }
 
-    imgWidth *= imgScale;
-    imgHeight *= imgScale;
-    imgRegX += (imgWidth-canvas.width)/imgScale/2;
-    imgRegY += (imgHeight-canvas.height)/imgScale/2;
-    if(imgScale*vertSquashRatio != 1 || imgScale != 1)
-        ictx.scale(imgScale*vertSquashRatio, imgScale);
-    if(imgRegX != 0 || imgRegY != 0)
-        ictx.translate(-imgRegX, -imgRegY);
-    if(imgRotate)
-        ictx.rotate(imgRotate * Math.PI / 180);
-    //ctx.globalCompositeOperation = "destination-over"
-    ictx.drawImage(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
-    //preview();
-    if(isCrop) {
-        clear(ctx)
-        mask()
-        draw()
-        showMsg(message)
-        preview();
-    }else{
-        clear(ctx)
-        slideBar()
-        showMsg(message)
-        initTool()
-    }
-}
-img.src = './1.jpg';
-}
-function loadFromBlob() {
-    var urlAPI = window.createObjectURL && window ||
-    window.URL && URL.revokeObjectURL && URL ||
-    window.webkitURL,
-    createObjectURL = function(){};
-    if(urlAPI) {
-        return urlAPI.createObjectURL.apply(urlAPI, arguments);
-    }
-    return null;
-}
+        function clear(ctx) {
+            GUI.forEach(function (button) {
+                button.removePress();
+            });
+            GUI = [];
+            ctx.restore();
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+        }
+        function draw() {
+            if (!isCrop) return false;
+            dot = [
+                [100.5 + moved.x - halfStrokeSize, 100.5 + moved.y - halfStrokeSize],
+                [200.5 + moved.x - halfStrokeSize, 100.5 + moved.y - halfStrokeSize],
+                [300.5 + moved.x - halfStrokeSize, 100.5 + moved.y - halfStrokeSize],
+                [300.5 + moved.x - halfStrokeSize, 200.5 + moved.y - halfStrokeSize],
+                [300.5 + moved.x - halfStrokeSize, 300.5 + moved.y - halfStrokeSize],
+                [200.5 + moved.x - halfStrokeSize, 300.5 + moved.y - halfStrokeSize],
+                [100.5 + moved.x - halfStrokeSize, 300.5 + moved.y - halfStrokeSize],
+                [100.5 + moved.x - halfStrokeSize, 200.5 + moved.y - halfStrokeSize],
+                [100.5 + moved.x - halfStrokeSize, 300.5 + moved.y - halfStrokeSize],
+            ]
+            ctx.restore();
+            ctx.fillStyle = "rgba(3,169,244,1)";
+            ctx.strokeStyle = "rgb(255,255,255, 0.5)";
+            ctx.lineWidth = 1;
+            ctx.save()
+            ctx.setLineDash([4, 4]);
+            ctx.strokeRect(100.5 + moved.x, 100.5 + moved.y, 200, 200);
+            ctx.restore();
+            ctx.fillRect(dot[0][0], dot[0][1], strokeSize, strokeSize);
+            ctx.strokeRect(dot[0][0], dot[0][1], strokeSize, strokeSize);
+            ctx.fillRect(dot[1][0], dot[1][1], strokeSize, strokeSize);
+            ctx.strokeRect(dot[1][0], dot[1][1], strokeSize, strokeSize);
+            ctx.fillRect(dot[2][0], dot[2][1], strokeSize, strokeSize);
+            ctx.strokeRect(dot[2][0], dot[2][1], strokeSize, strokeSize);
+            ctx.fillRect(dot[3][0], dot[3][1], strokeSize, strokeSize);
+            ctx.strokeRect(dot[3][0], dot[3][1], strokeSize, strokeSize);
+            ctx.fillRect(dot[4][0], dot[4][1], strokeSize, strokeSize);
+            ctx.strokeRect(dot[4][0], dot[4][1], strokeSize, strokeSize);
+            ctx.fillRect(dot[5][0], dot[5][1], strokeSize, strokeSize);
+            ctx.strokeRect(dot[5][0], dot[5][1], strokeSize, strokeSize);
+            ctx.fillRect(dot[6][0], dot[6][1], strokeSize, strokeSize);
+            ctx.strokeRect(dot[6][0], dot[6][1], strokeSize, strokeSize);
+            ctx.fillRect(dot[7][0], dot[7][1], strokeSize, strokeSize);
+            ctx.strokeRect(dot[7][0], dot[7][1], strokeSize, strokeSize);
+        }
 
-function getAsDataUrl(_canvas) {
-return _canvas.toDataURL('image/jpeg', 0.75);
-}
+        function preview() {
+            if (!isCrop) return false;
+            ctx.restore();
+            var x = 0, y = 0;
+            if (100.5 + moved.y < 85) {
+                if (101 + moved.x < 85) {
+                    // 右
+                    x = 205;
+                } else {
+                    // 左
+                    x = -85;
+                }
+                y = 85
+            }
+            ctx.clearRect(102 + moved.x + x, 16 + moved.y + y, 80, 80);
+            //ctx.drawImage(img, (xPointer-10)/imgScale+imgRegX, (yPointer-10)/imgScale+imgRegY, 20/imgScale, 20/imgScale, 102+moved.x+x, 15.5+moved.y+y, 80, 80)
+            ctx.drawImage(imgBox, (xPointer - 10), (yPointer - 10), 20, 20, 102 + moved.x + x, 15.5 + moved.y + y, 80, 80)
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(102 + moved.x + x, 56.5 + moved.y + y);
+            ctx.lineTo(182 + moved.x + x, 56.5 + moved.y + y);
+            ctx.moveTo(142.5 + moved.x + x, 16.5 + moved.y + y);
+            ctx.lineTo(142.5 + moved.x + x, 95.5 + moved.y + y);
+            ctx.closePath();
+            ctx.stroke();
 
-function detectVerticalSquash(img) {
-var ih = img.height;
-var canvas = document.createElement('canvas');
-canvas.width = 1;
-canvas.height = ih;
-var ctx = canvas.getContext('2d');
-ctx.drawImage(img, 0, 0);
-var data = ctx.getImageData(0, 0, 1, ih).data;
-// search image edge pixel position in case it is squashed vertically.
-var sy = 0;
-var ey = ih;
-var py = ih;
-while (py > sy) {
-var alpha = data[(py - 1) * 4 + 3];
-if (alpha === 0) {
-ey = py;
-} else {
-sy = py;
-}
-py = (ey + sy) >> 1;
-}
-var ratio = (py / ih);
-return (ratio===0) ? 1 : ratio;
-}
+        }
+
+        function mask() {
+            if (!isCrop) return false;
+            ctx.restore();
+            //ctx.globalCompositeOperation = "destination-over"
+            ctx.fillStyle = "rgba(0,0,0,0.5)";
+            ctx.strokeStyle = "rgb(255,255,255)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(101 + moved.x, 100.5 + moved.y, 199.5, 199);
+            ctx.lineWidth = 1;
+            console.log(101 + moved.x, 100.5 + moved.y)
+            if (100.5 + moved.y < 85) {
+                ctx.fillRect(101 + 149.5 + moved.x, 100.5 + 206 + moved.y, 50, 25);
+                ctx.strokeRect(101 + 149.5 + moved.x, 100.5 + 206 + moved.y, 50, 25);
+                if (101 + moved.x < 85) {
+                    // 右
+                    ctx.strokeRect(306.5 + moved.x, 100.5 + moved.y, 81, 81);
+                } else {
+                    // 左
+                    ctx.strokeRect(16.5 + moved.x, 100.5 + moved.y, 81, 81);
+                }
+            } else if (300.5 + moved.y > canvas.height - 30) {
+                ctx.strokeRect(101 + moved.x, 15.5 + moved.y, 81, 81);
+                if (101 + moved.x < 55) {
+                    // 右
+                    ctx.fillRect(306 + moved.x, 100.5 + 176 + moved.y, 50, 25);
+                    ctx.strokeRect(306 + moved.x, 100.5 + 176 + moved.y, 50, 25);
+                    position.cropSubmit.bX = 331.5;
+                    position.cropSubmit.bY = 278.5;
+                    position.cropCancel.bX = 305.5;
+                    position.cropCancel.bY = 278.5;
+                } else {
+                    // 左
+                    ctx.fillRect(46 + moved.x, 100.5 + 176 + moved.y, 50, 25);
+                    ctx.strokeRect(46 + moved.x, 100.5 + 176 + moved.y, 50, 25);
+                    position.cropSubmit.bX = 72.5;
+                    position.cropSubmit.bY = 278.5;
+                    position.cropCancel.bX = 46.5;
+                    position.cropCancel.bY = 278.5;
+                }
+            } else {
+                ctx.strokeRect(101.5 + moved.x, 15.5 + moved.y, 81, 81);
+                ctx.fillRect(101 + 149.5 + moved.x, 100.5 + 206 + moved.y, 50, 25);
+                ctx.strokeRect(101 + 149.5 + moved.x, 100.5 + 206 + moved.y, 50, 25);
+                position.cropSubmit.bX = 276.5;
+                position.cropSubmit.bY = 308.5;
+                position.cropCancel.bX = 250.5;
+                position.cropCancel.bY = 308.5;
+            }
+            GUI.push(
+                new Button(position.cropSubmit.iX, position.cropSubmit.iY, position.cropSubmit.iW, position.cropSubmit.iH, position.cropSubmit.bX + moved.x, position.cropSubmit.bY + moved.y, position.cropSubmit.bW, position.cropSubmit.bH, function () {
+                    console.log('crop')
+                    crop()
+                })
+            );
+            GUI.push(
+                new Button(position.cropCancel.iX, position.cropCancel.iY, position.cropCancel.iW, position.cropCancel.iH, position.cropCancel.bX + moved.x, position.cropCancel.bY + moved.y, position.cropCancel.bW, position.cropCancel.bH, function () {
+                    isCrop = false;
+                    load()
+                })
+            );
+            drawGUI();
+        }
 
 
-window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-requestAnimationFrame(step);
-//load()
-</script>
+        function step(timestamp) {
+            if (timestamp % 500 > 250) {
+                if (ctx.lineDashOffset === 2) {
+                    requestAnimationFrame(step);
+                    return false;
+                }
+                ctx.restore();
+                ctx.lineDashOffset = 2;
+            } else {
+                if (ctx.lineDashOffset === 6) {
+                    requestAnimationFrame(step);
+                    return false;
+                }
+                ctx.restore();
+                ctx.lineDashOffset = 6;
+            }
+            console.log('draw')
+            load()
+            requestAnimationFrame(step);
+        }
+
+        function load() {
+            img.onload = function () {
+                clear(ictx)
+                //mask()
+                //draw()
+                //slideBar()
+                //initTool()
+                //showMsg(message)
+                ictx.save();
+                var imgRotation = 0;
+                imgRegX = 0;
+                imgRegY = 0;
+                var vertSquashRatio = detectVerticalSquash(img);
+                var imgWidth = img.width;
+                var imgHeight = img.height;
+                var imgRotate = (rotate % 360 + 360) % 360;
+                imgScale = 1;
+                imgWidth *= vertSquashRatio;
+                imgHeight *= vertSquashRatio;
+                // 根据长宽比进行缩放
+                if (canvas.width / imgWidth > canvas.height / imgHeight) {
+                    imgScale = canvas.width / imgWidth;
+                } else {
+                    imgScale = canvas.height / imgHeight;
+                }
+                imgScale += imgScale * bigger;
+                // 旋转
+                switch (imgRotate) {
+                    case 90:
+                        imgRegX = -imgHeight * vertSquashRatio;
+                        break;
+                    case 180:
+                        imgRegX = -imgWidth;
+                        imgRegY = -imgHeight * vertSquashRatio;
+                        break;
+                    case 270:
+                        imgRegY = -imgWidth * vertSquashRatio;
+                        break;
+                }
+
+                imgWidth *= imgScale;
+                imgHeight *= imgScale;
+                imgRegX += (imgWidth - canvas.width) / imgScale / 2;
+                imgRegY += (imgHeight - canvas.height) / imgScale / 2;
+                if (imgScale * vertSquashRatio != 1 || imgScale != 1)
+                    ictx.scale(imgScale * vertSquashRatio, imgScale);
+                if (imgRegX != 0 || imgRegY != 0)
+                    ictx.translate(-imgRegX, -imgRegY);
+                if (imgRotate)
+                    ictx.rotate(imgRotate * Math.PI / 180);
+                //ctx.globalCompositeOperation = "destination-over"
+                ictx.drawImage(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
+                //preview();
+                if (isCrop) {
+                    clear(ctx)
+                    mask()
+                    draw()
+                    showMsg(message)
+                    preview();
+                } else {
+                    clear(ctx)
+                    slideBar()
+                    showMsg(message)
+                    initTool()
+                }
+            }
+            img.src = './1.jpg';
+        }
+        function loadFromBlob() {
+            var urlAPI = window.createObjectURL && window ||
+                window.URL && URL.revokeObjectURL && URL ||
+                window.webkitURL,
+                createObjectURL = function () { };
+            if (urlAPI) {
+                return urlAPI.createObjectURL.apply(urlAPI, arguments);
+            }
+            return null;
+        }
+
+        function getAsDataUrl(_canvas) {
+            return _canvas.toDataURL('image/jpeg', 0.75);
+        }
+
+        function detectVerticalSquash(img) {
+            var ih = img.height;
+            var canvas = document.createElement('canvas');
+            canvas.width = 1;
+            canvas.height = ih;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            var data = ctx.getImageData(0, 0, 1, ih).data;
+            // search image edge pixel position in case it is squashed vertically.
+            var sy = 0;
+            var ey = ih;
+            var py = ih;
+            while (py > sy) {
+                var alpha = data[(py - 1) * 4 + 3];
+                if (alpha === 0) {
+                    ey = py;
+                } else {
+                    sy = py;
+                }
+                py = (ey + sy) >> 1;
+            }
+            var ratio = (py / ih);
+            return (ratio === 0) ? 1 : ratio;
+        }
+
+
+        //window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+        //requestAnimationFrame(step);
+        load()
+    </script>
 
 </body>
 
